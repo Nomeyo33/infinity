@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infinity Awaits</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Quicksand', sans-serif;
+      background-color: #000;
+      color: #fff;
+      overflow: hidden;
+      perspective: 1000px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 4rem;
+      margin: 0;
+      letter-spacing: 0.5rem;
+      opacity: 0;
+      animation: fadeIn 5s ease-in-out infinite;
+      cursor: pointer;
+    }
+
+    p {
+      font-size: 1.5rem;
+      margin-top: 20px;
+      width: 80%;
+      max-width: 700px;
+      opacity: 0;
+      animation: fadeInText 8s ease-in-out infinite;
+    }
+
+    .infinity-symbol {
+      font-size: 10rem;
+      animation: rotateSymbol 20s infinite linear;
+      opacity: 0.1;
+      cursor: pointer;
+    }
+
+    .hidden-message {
+      font-size: 1.5rem;
+      margin-top: 30px;
+      opacity: 0;
+      transition: opacity 2s ease-in-out;
+      color: #ff0000;
+    }
+
+    .puzzle-container {
+      display: none;
+      margin-top: 50px;
+      text-align: center;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 1.2rem;
+      background: #222;
+      color: #fff;
+      border: 1px solid #555;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #444;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #555;
+    }
+
+    .static-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('https://media.giphy.com/media/l4KibK3JwaVo0CjDO/giphy.gif');
+      opacity: 0.05;
+      pointer-events: none;
+    }
+
+    .glitch {
+      font-size: 2rem;
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      color: red;
+      animation: glitchEffect 2s infinite;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    @keyframes fadeInText {
+      0% {
+        opacity: 0;
+      }
+      40% {
+        opacity: 0;
+      }
+      80% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    @keyframes rotateSymbol {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes glitchEffect {
+      0% {
+        text-shadow: 2px 2px 0 #fff, -2px -2px 0 red;
+      }
+      20% {
+        text-shadow: -2px -2px 0 red, 2px 2px 0 #fff;
+      }
+      40% {
+        text-shadow: -2px 2px 0 red, 2px -2px 0 #fff;
+      }
+      60% {
+        text-shadow: 2px -2px 0 red, -2px 2px 0 #fff;
+      }
+      80% {
+        text-shadow: 2px 2px 0 red, -2px -2px 0 #fff;
+      }
+      100% {
+        text-shadow: 2px 2px 0 #fff, -2px -2px 0 red;
+      }
+    }
+
+    .correct-message {
+      color: lime;
+      display: none;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="infinity-symbol" id="infinity-symbol">∞</div>
+    <h1 id="main-text">Infinity Awaits</h1>
+    <p>The further you travel, the less you know... Is it terror you feel, or awe?</p>
+    <div class="hidden-message" id="hidden-message">The loop begins...</div>
+
+    <!-- Hidden Puzzle -->
+    <div class="puzzle-container" id="puzzle-container">
+      <h2>Solve this riddle:</h2>
+      <p>I have no beginning, and I have no end. What am I?</p>
+      <input type="text" id="riddle-answer" placeholder="Your answer here">
+      <button id="submit-answer">Submit</button>
+      <div class="correct-message" id="correct-message">Correct! You've unlocked a new path...</div>
+    </div>
+  </div>
+
+  <div class="static-overlay"></div>
+
+  <div class="glitch" id="glitch-text">ERROR: You shouldn't be here...</div>
+
+  <!-- Background Sound -->
+  <audio id="background-audio" loop>
+    <source src="https://freesound.org/data/previews/466/466208_9006571-lq.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- JavaScript for Interactivity -->
+  <script>
+    // Play background sound on load
+    const backgroundAudio = document.getElementById('background-audio');
+    backgroundAudio.volume = 0.2;
+    backgroundAudio.play();
+
+    // Click event for the infinity symbol
+    const infinitySymbol = document.getElementById('infinity-symbol');
+    const hiddenMessage = document.getElementById('hidden-message');
+    const puzzleContainer = document.getElementById('puzzle-container');
+
+    let clickCount = 0;
+
+    infinitySymbol.addEventListener('click', () => {
+      hiddenMessage.style.opacity = 1; // Reveal hidden message
+      clickCount++;
+      
+      // After 3 clicks, reveal the puzzle
+      if (clickCount >= 3) {
+        puzzleContainer.style.display = 'block';
+        hiddenMessage.innerText = 'The puzzle has been revealed...';
+      }
+    });
+
+    // Glitch click event - transport user to "a different page"
+    const glitchText = document.getElementById('glitch-text');
+    glitchText.addEventListener('click', () => {
+      alert("You've been pulled deeper into the void.");
+      window.location.href = 'https://example.com/deeper-into-the-void'; // Redirect to a new mysterious page
+    });
+
+    // Puzzle answer submission
+    const submitAnswerButton = document.getElementById('submit-answer');
+    const riddleAnswerInput = document.getElementById('riddle-answer');
+    const correctMessage = document.getElementById('correct-message');
+
+    submitAnswerButton.addEventListener('click', () => {
+      const answer = riddleAnswerInput.value.toLowerCase();
+
+      if (answer === 'infinity') {
+        correctMessage.style.display = 'block';
+        // You can also add another redirection here to unlock a new part of the ARG
+      } else {
+        alert('Incorrect answer. Try again.');
+      }
+    });
+  </script>
+</body>
+</html>
